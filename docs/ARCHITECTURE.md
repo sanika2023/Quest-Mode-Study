@@ -8,8 +8,9 @@ A student adds notes. Gemini turns them into a fantasy campaign with one chapter
 
 ## Current status
 
-- Tiger Data (PostgreSQL) is provisioned.
+- Tiger Data (PostgreSQL) is provisioned and the schema is applied.
 - Gemini is the only model dependency needed to start.
+- Built so far: build steps 1 and 2 (campaign creation and reading, citation check, Notes and Roadmap screens). Next is step 3.
 - **ElevenLabs is not available yet.** The app must run fully with `ELEVENLABS_API_KEY` unset. Build the review break in text mode first. Voice is a second provider behind the same interface.
 
 ## System diagram
@@ -144,8 +145,8 @@ sequenceDiagram
 | Method and path | Body | Returns | Notes |
 | --- | --- | --- | --- |
 | `GET /api/config` | | `{ voice_available, demo_mode }` | `voice_available` is true only when the ElevenLabs env vars are set |
-| `POST /api/campaigns` | `notes_text`, or a PDF file, or `topic`; plus `planned_minutes` | Campaign with chapters | Runs Call 1 and the citation check |
-| `GET /api/campaigns/:id` | | Campaign with chapters | Reads from the database. Never calls the model |
+| `POST /api/campaigns` | JSON `{ notes_text \| topic, planned_minutes }`, or multipart with `file` (PDF) and `planned_minutes` | Campaign with chapters, status 201 | Runs Call 1 and the citation check. 400 for a missing or invalid field or a PDF with no text, 502 if generation fails. Errors are `{ error }` |
+| `GET /api/campaigns/:id` | | Campaign with chapters | Reads from the database. Never calls the model. 404 `{ error }` for an unknown or malformed id |
 | `PATCH /api/chapters/:id` | `status` | Chapter | Status is `locked`, `active`, or `done` |
 | `POST /api/review/turn` | `chapter_id`, `mode`, `transcript`, `message` | `{ reply }` | Text mode only |
 | `GET /api/review/voice-token` | query: `chapter_id`, `mode` | `{ token, variables }` | Returns 503 when voice is not configured |
@@ -180,6 +181,39 @@ Campaign JSON, the output of Call 1:
   ]
 }
 ```
+
+Campaign API response, returned by `POST /api/campaigns` and `GET /api/campaigns/:id` (built from the `campaigns` and `chapters` tables, not from `campaign_json`):
+
+```json
+{
+  "id": "uuid",
+  "title": "The Siege of Mitochondria Keep",
+  "premise": "One line of story.",
+  "has_notes": true,
+  "chapters": [
+    {
+      "id": "uuid",
+      "position": 1,
+      "status": "active",
+      "title": "Chapter title",
+      "story_beat": "Two sentences of story.",
+      "concepts": [],
+      "quiz": [],
+      "misconception": null,
+      "villains": []
+    }
+  ]
+}
+```
+
+- `notes_text` is never returned. `has_notes` is false in topic-only mode, which the UI shows as "not checked against notes".
+- Chapter 1 is saved as `active` and the rest as `locked`.
+- After the citation check, a chapter may have fewer concepts or quiz items than generated, and `misconception` is `null` if its quote failed. Teach-back needs a fallback for a chapter without a misconception.
+
+Campaign generation details:
+
+- Chapter count is `planned_minutes // 30`, at least 1 and at most 6.
+- One Gemini call produces every chapter. A chapter left with fewer than 2 concepts after the check is regenerated once with `prompts/campaign_chapter.md`, then accepted as is.
 
 Grading result, the output of Call 2:
 
@@ -227,7 +261,7 @@ CREATE TABLE chapters (
   campaign_id   UUID NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
   position      INT  NOT NULL,
   title         TEXT NOT NULL,
-  concepts_json JSONB NOT NULL,       -- concepts, quiz, misconception
+  concepts_json JSONB NOT NULL,       -- story_beat, concepts, quiz, misconception
   villains_json JSONB NOT NULL DEFAULT '[]', -- missed concepts carried in from earlier chapters
   status        TEXT NOT NULL DEFAULT 'locked'
 );
@@ -259,13 +293,19 @@ There are no user accounts. One local user is enough. Login feature can be imple
 
 ```
 quest-mode-study/
-  ARCHITECTURE.md
+  CLAUDE.md
   README.md
+  docs/ARCHITECTURE.md
   backend/
     app.py                 # Flask app and route registration
-    config.py              # env vars, feature flags
-    db.py                  # connection and queries
+    config.py              # loads backend/.env; voice_available(), demo_mode()
+    db.py                  # connection, save_campaign, get_campaign
     schema.sql
+    conftest.py            # puts backend/ on the pytest path
+    tests/                 # pytest; Gemini is faked, DB tests skip without DATABASE_URL
+    scripts/
+      apply_schema.py      # applies schema.sql (idempotent)
+      smoke_test.py        # one real call to the database and Gemini
     routes/
       campaigns.py
       review.py
@@ -280,6 +320,7 @@ quest-mode-study/
       pdf_text.py
     prompts/
       campaign.md
+      campaign_chapter.md  # regenerates one thin chapter
       character.md         # shared by text mode and the ElevenLabs agent
       grading.md
     eval/
@@ -287,9 +328,11 @@ quest-mode-study/
       sample_notes/
     requirements.txt
   frontend/
+    vite.config.ts         # Tailwind plugin, /api proxy to :5000, Vitest
     src/
-      api/client.ts
-      screens/             # Notes, Roadmap, Focus, BreakChoice, Review, Results
+      App.tsx              # switches screens; restores the last campaign id from localStorage
+      api/client.ts        # typed fetch wrappers; client.test.ts beside it
+      screens/             # Notes, Roadmap (built); Focus, BreakChoice, Review, Results (to do)
       review/
         types.ts           # ReviewProvider, TranscriptTurn
         TextReview.ts
@@ -298,7 +341,7 @@ quest-mode-study/
       breaks/BoxBreathing.tsx
       timer/usePomodoro.ts
     package.json
-  .env.example
+  .env.example             # variable names only; real values go in backend/.env (gitignored)
 ```
 
 ## Environment variables
