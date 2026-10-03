@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS chapters (
   campaign_id   UUID NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
   position      INT  NOT NULL,
   title         TEXT NOT NULL,
-  concepts_json JSONB NOT NULL,       -- concepts, quiz, misconception
+  concepts_json JSONB NOT NULL,       -- story_beat, concepts, quiz, misconception
   villains_json JSONB NOT NULL DEFAULT '[]', -- missed concepts carried in from earlier chapters
   status        TEXT NOT NULL DEFAULT 'locked'
 );
