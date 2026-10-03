@@ -10,7 +10,7 @@ A student adds notes. Gemini turns them into a fantasy campaign with one chapter
 
 - Tiger Data (PostgreSQL) is provisioned and the schema is applied.
 - Gemini is the only model dependency needed to start.
-- Built so far: build steps 1 and 2 (campaign creation and reading, citation check, Notes and Roadmap screens). Step 3 is built except the break content (placeholders until steps 4 and 7).
+- Built so far: build steps 1 and 2 (campaign creation and reading, citation check, Notes and Roadmap screens). Steps 1-4 are built (text review included). Fun break is a placeholder until step 7.
 - **ElevenLabs is not available yet.** The app must run fully with `ELEVENLABS_API_KEY` unset. Build the review break in text mode first. Voice is a second provider behind the same interface.
 
 ## System diagram
@@ -87,7 +87,7 @@ export interface ReviewProvider {
 
 - `TextReview`: each student message goes to `POST /api/review/turn`. Flask calls Gemini with the character prompt and chapter context, and returns the reply.
 - `VoiceReview`: asks Flask for a session token, then talks to the ElevenLabs agent directly from the browser using `@elevenlabs/react`. It records each turn into the same `TranscriptTurn[]` shape.
-- The character prompt lives in one file, `backend/prompts/character.md`. Text mode sends it to Gemini. Voice mode uses the same text as the ElevenLabs agent prompt.
+- The character prompts live in `backend/prompts/character_quiz.md` and `character_teachback.md`. Text mode sends them to Gemini. Voice mode will use the same text as the ElevenLabs agent prompt.
 - On startup the frontend calls `GET /api/config`. If `voice_available` is false, only `TextReview` is offered.
 
 ## Flow 1: create a campaign
@@ -148,7 +148,7 @@ sequenceDiagram
 | `POST /api/campaigns` | JSON `{ notes_text \| topic, planned_minutes }`, or multipart with `file` (PDF) and `planned_minutes` | Campaign with chapters, status 201 | Runs Call 1 and the citation check. 400 for a missing or invalid field or a PDF with no text, 502 if generation fails. Errors are `{ error }` |
 | `GET /api/campaigns/:id` | | Campaign with chapters | Reads from the database. Never calls the model. 404 `{ error }` for an unknown or malformed id |
 | `PATCH /api/chapters/:id` | `status` | Chapter | Status is `locked`, `active`, or `done`. Setting `done` activates the next locked chapter. 400 for a bad status, 404 for an unknown id |
-| `POST /api/review/turn` | `chapter_id`, `mode`, `transcript`, `message` | `{ reply }` | Text mode only |
+| `POST /api/review/turn` | `chapter_id`, `mode`, `transcript` (turns before this one), `message`, optional `skip` (quiz only) | `{ reply, done }` | Text mode only. No `message` returns the opening turn, built from saved data with no model call. Quiz asks up to 3 saved questions; `skip: true` reveals the answer and moves on with no model call; teach-back ends after 3 student turns. 400 for a bad mode or transcript, an empty mid-conversation message, or teach-back on a chapter with no misconception; 404 unknown chapter; 502 model failure |
 | `GET /api/review/voice-token` | query: `chapter_id`, `mode` | `{ token, variables }` | Returns 503 when voice is not configured |
 | `POST /api/chapters/:id/grade` | `mode`, `transcript` | `{ results }` | Runs Call 2 and the citation check, writes `attempts` |
 | `GET /api/campaigns/:id/progress` | | Attempts over time | Stretch, for the progress chart |
@@ -321,7 +321,7 @@ quest-mode-study/
     prompts/
       campaign.md
       campaign_chapter.md  # regenerates one thin chapter
-      character.md         # shared by text mode and the ElevenLabs agent
+      character_quiz.md, character_teachback.md  # shared by text mode and the ElevenLabs agent
       grading.md
     eval/
       run_eval.py          # citation pass rate over sample notes
@@ -332,7 +332,7 @@ quest-mode-study/
     src/
       App.tsx              # switches screens; restores the last campaign id from localStorage
       api/client.ts        # typed fetch wrappers; client.test.ts beside it
-      screens/             # Notes, Roadmap, SettingsPanel, Session, Focus, BreakChoice, BreakPlaceholder (built); Review, Results (to do)
+      screens/             # Notes, Roadmap, SettingsPanel, Session, Focus, BreakChoice, BreakPlaceholder, Review (built); Results (to do)
       hooks/useCountdown.ts  # end-timestamp countdown
       lib/                 # timer.ts (durations, formatting), settings.ts (localStorage, default 25/5), brownNoise.ts; tests beside each
       review/

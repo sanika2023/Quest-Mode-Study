@@ -83,3 +83,26 @@ export function updateChapterStatus(id: string, status: ChapterStatus): Promise<
     body: JSON.stringify({ status }),
   })
 }
+
+export type ReviewMode = 'quiz' | 'teachback'
+
+export interface TranscriptTurn {
+  role: 'character' | 'student'
+  text: string
+}
+
+export interface ReviewTurnInput {
+  chapter_id: string
+  mode: ReviewMode
+  transcript: TranscriptTurn[]
+  message?: string
+  skip?: boolean
+}
+
+export function reviewTurn(input: ReviewTurnInput): Promise<{ reply: string; done: boolean }> {
+  return request('/api/review/turn', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  })
+}

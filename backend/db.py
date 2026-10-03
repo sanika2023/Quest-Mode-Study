@@ -69,6 +69,20 @@ def _chapter(row):
     }
 
 
+def get_chapter(chapter_id):
+    """Read one chapter, or None."""
+    try:
+        uuid.UUID(chapter_id)
+    except ValueError:
+        return None
+    with connect() as conn:
+        row = conn.execute(
+            "SELECT id, position, title, concepts_json, villains_json, status FROM chapters WHERE id = %s",
+            (chapter_id,),
+        ).fetchone()
+    return _chapter(row) if row else None
+
+
 def update_chapter_status(chapter_id, status):
     """Set a chapter's status; finishing it activates the next locked chapter. Returns the chapter or None."""
     try:

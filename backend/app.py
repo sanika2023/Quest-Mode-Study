@@ -1,7 +1,7 @@
 from flask import Flask, jsonify
 
 import config
-from routes import campaigns
+from routes import campaigns, review
 
 
 def create_app():
@@ -12,6 +12,7 @@ def create_app():
         return jsonify(voice_available=config.voice_available(), demo_mode=config.demo_mode())
 
     app.register_blueprint(campaigns.bp)
+    app.register_blueprint(review.bp)
     return app
 
 

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { createCampaign, getCampaign, updateChapterStatus } from './client'
+import { createCampaign, getCampaign, reviewTurn, updateChapterStatus } from './client'
 
 function mockFetch(status: number, body: unknown) {
   const fn = vi.fn().mockResolvedValue({
@@ -84,5 +84,17 @@ describe('updateChapterStatus', () => {
   it('throws on 404', async () => {
     mockFetch(404, { error: 'Chapter not found' })
     await expect(updateChapterStatus('x', 'done')).rejects.toThrow('Chapter not found')
+  })
+})
+
+describe('reviewTurn', () => {
+  it('posts the turn and returns the reply', async () => {
+    const fetchMock = mockFetch(200, { reply: 'hi', done: false })
+    const input = { chapter_id: 'ch1', mode: 'quiz' as const, transcript: [], message: 'a' }
+    expect(await reviewTurn(input)).toEqual({ reply: 'hi', done: false })
+    const [url, init] = fetchMock.mock.calls[0]
+    expect(url).toBe('/api/review/turn')
+    expect(init.method).toBe('POST')
+    expect(JSON.parse(init.body)).toEqual(input)
   })
 })

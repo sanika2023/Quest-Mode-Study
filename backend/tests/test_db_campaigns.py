@@ -86,3 +86,11 @@ def test_update_unknown_chapter_returns_none():
 def test_get_unknown_returns_none():
     assert db.get_campaign("00000000-0000-0000-0000-000000000000") is None
     assert db.get_campaign("not-a-uuid") is None
+
+
+def test_get_chapter(saved_id):
+    first, _ = db.get_campaign(saved_id)["chapters"]
+    got = db.get_chapter(first["id"])
+    assert got["title"] == "One" and got["concepts"][0]["name"] == "A"
+    assert db.get_chapter("not-a-uuid") is None
+    assert db.get_chapter("00000000-0000-0000-0000-000000000000") is None

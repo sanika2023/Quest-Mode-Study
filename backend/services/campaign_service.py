@@ -1,9 +1,6 @@
-from pathlib import Path
-
-from services import gemini_client
+from services import gemini_client, prompts
 from services.citation_check import citation_check
 
-PROMPTS = Path(__file__).parent.parent / "prompts"
 MINUTES_PER_CHAPTER = 30
 MAX_CHAPTERS = 6
 MIN_CONCEPTS = 2
@@ -34,13 +31,6 @@ def chapter_count(planned_minutes: int) -> int:
     return max(1, min(MAX_CHAPTERS, planned_minutes // MINUTES_PER_CHAPTER))
 
 
-def _prompt(name, **values):
-    text = (PROMPTS / name).read_text(encoding="utf-8")
-    for key, value in values.items():
-        text = text.replace("{{" + key + "}}", str(value))
-    return text
-
-
 def _verified(chapter, notes):
     """Keep only items whose quote is in the notes. Without notes (topic mode) nothing is checked."""
     if notes is None:
@@ -62,7 +52,7 @@ def generate_campaign(planned_minutes, notes_text=None, topic=None):
     """Call 1. Returns campaign JSON where every kept quote passed citation_check."""
     source = notes_text if notes_text is not None else topic
     raw = gemini_client.generate_json(
-        _prompt("campaign.md", chapter_count=chapter_count(planned_minutes), source=source),
+        prompts.load("campaign.md", chapter_count=chapter_count(planned_minutes), source=source),
         schema=CAMPAIGN_SCHEMA,
     )
     chapters = []
@@ -70,7 +60,7 @@ def generate_campaign(planned_minutes, notes_text=None, topic=None):
         chapter = _verified(chapter, notes_text)
         if notes_text is not None and len(chapter["concepts"]) < MIN_CONCEPTS:
             retry = gemini_client.generate_json(
-                _prompt("campaign_chapter.md", chapter_title=chapter["title"], source=source),
+                prompts.load("campaign_chapter.md", chapter_title=chapter["title"], source=source),
                 schema=CAMPAIGN_SCHEMA,
             )
             chapter = _verified(retry["chapters"][0], notes_text)
