@@ -10,7 +10,7 @@ A student adds notes. Gemini turns them into a fantasy campaign with one chapter
 
 - Tiger Data (PostgreSQL) is provisioned and the schema is applied.
 - Gemini is the only model dependency needed to start.
-- Built so far: build steps 1 and 2 (campaign creation and reading, citation check, Notes and Roadmap screens). Next is step 3.
+- Built so far: build steps 1 and 2 (campaign creation and reading, citation check, Notes and Roadmap screens). Step 3 is built except the break content (placeholders until steps 4 and 7).
 - **ElevenLabs is not available yet.** The app must run fully with `ELEVENLABS_API_KEY` unset. Build the review break in text mode first. Voice is a second provider behind the same interface.
 
 ## System diagram
@@ -147,7 +147,7 @@ sequenceDiagram
 | `GET /api/config` | | `{ voice_available, demo_mode }` | `voice_available` is true only when the ElevenLabs env vars are set |
 | `POST /api/campaigns` | JSON `{ notes_text \| topic, planned_minutes }`, or multipart with `file` (PDF) and `planned_minutes` | Campaign with chapters, status 201 | Runs Call 1 and the citation check. 400 for a missing or invalid field or a PDF with no text, 502 if generation fails. Errors are `{ error }` |
 | `GET /api/campaigns/:id` | | Campaign with chapters | Reads from the database. Never calls the model. 404 `{ error }` for an unknown or malformed id |
-| `PATCH /api/chapters/:id` | `status` | Chapter | Status is `locked`, `active`, or `done` |
+| `PATCH /api/chapters/:id` | `status` | Chapter | Status is `locked`, `active`, or `done`. Setting `done` activates the next locked chapter. 400 for a bad status, 404 for an unknown id |
 | `POST /api/review/turn` | `chapter_id`, `mode`, `transcript`, `message` | `{ reply }` | Text mode only |
 | `GET /api/review/voice-token` | query: `chapter_id`, `mode` | `{ token, variables }` | Returns 503 when voice is not configured |
 | `POST /api/chapters/:id/grade` | `mode`, `transcript` | `{ results }` | Runs Call 2 and the citation check, writes `attempts` |
@@ -332,14 +332,14 @@ quest-mode-study/
     src/
       App.tsx              # switches screens; restores the last campaign id from localStorage
       api/client.ts        # typed fetch wrappers; client.test.ts beside it
-      screens/             # Notes, Roadmap (built); Focus, BreakChoice, Review, Results (to do)
+      screens/             # Notes, Roadmap, SettingsPanel, Session, Focus, BreakChoice, BreakPlaceholder (built); Review, Results (to do)
+      hooks/useCountdown.ts  # end-timestamp countdown
+      lib/                 # timer.ts (durations, formatting), settings.ts (localStorage, default 25/5), brownNoise.ts; tests beside each
       review/
         types.ts           # ReviewProvider, TranscriptTurn
         TextReview.ts
         VoiceReview.ts     # stub until ElevenLabs works
-      audio/brownNoise.ts
       breaks/BoxBreathing.tsx
-      timer/usePomodoro.ts
     package.json
   .env.example             # variable names only; real values go in backend/.env (gitignored)
 ```

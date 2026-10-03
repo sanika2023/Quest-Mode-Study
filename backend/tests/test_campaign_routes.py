@@ -102,3 +102,32 @@ def test_get_reads_db_and_never_calls_model(client, fakes, monkeypatch):
 
 def test_get_unknown_is_404(client, fakes):
     assert client.get("/api/campaigns/nope").status_code == 404
+
+
+@pytest.fixture
+def chapter_fake(monkeypatch):
+    seen = {}
+
+    def update(chapter_id, status):
+        seen["update"] = (chapter_id, status)
+        return {"id": chapter_id, "status": status} if chapter_id == "ch1" else None
+
+    monkeypatch.setattr(db, "update_chapter_status", update)
+    return seen
+
+
+def test_patch_chapter_status(client, chapter_fake):
+    res = client.patch("/api/chapters/ch1", json={"status": "done"})
+    assert res.status_code == 200
+    assert res.get_json() == {"id": "ch1", "status": "done"}
+    assert chapter_fake["update"] == ("ch1", "done")
+
+
+@pytest.mark.parametrize("body", [{}, {"status": "bogus"}])
+def test_patch_chapter_rejects_bad_status(client, chapter_fake, body):
+    assert client.patch("/api/chapters/ch1", json=body).status_code == 400
+    assert "update" not in chapter_fake
+
+
+def test_patch_unknown_chapter_is_404(client, chapter_fake):
+    assert client.patch("/api/chapters/nope", json={"status": "done"}).status_code == 404

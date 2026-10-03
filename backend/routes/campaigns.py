@@ -43,6 +43,17 @@ def create_campaign():
     return jsonify(db.get_campaign(campaign_id)), 201
 
 
+@bp.patch("/api/chapters/<chapter_id>")
+def update_chapter(chapter_id):
+    status = (request.get_json(silent=True) or {}).get("status")
+    if status not in ("locked", "active", "done"):
+        return _error("status must be locked, active, or done", 400)
+    chapter = db.update_chapter_status(chapter_id, status)
+    if chapter is None:
+        return _error("Chapter not found", 404)
+    return jsonify(chapter)
+
+
 @bp.get("/api/campaigns/<campaign_id>")
 def get_campaign(campaign_id):
     campaign = db.get_campaign(campaign_id)

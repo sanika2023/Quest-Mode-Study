@@ -75,3 +75,11 @@ export function createCampaign(input: CampaignInput): Promise<Campaign> {
 export function getCampaign(id: string): Promise<Campaign> {
   return request(`/api/campaigns/${id}`)
 }
+
+export function updateChapterStatus(id: string, status: ChapterStatus): Promise<Chapter> {
+  return request(`/api/chapters/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
+  })
+}
