@@ -64,6 +64,25 @@ def test_topic_only_has_no_notes():
             conn.execute("DELETE FROM campaigns WHERE id = %s", (campaign_id,))
 
 
+def test_done_activates_next_chapter(saved_id):
+    first, second = db.get_campaign(saved_id)["chapters"]
+    updated = db.update_chapter_status(first["id"], "done")
+    assert updated["status"] == "done"
+    assert updated["title"] == "One"
+    assert db.get_campaign(saved_id)["chapters"][1]["status"] == "active"
+
+
+def test_status_change_without_done_leaves_next_locked(saved_id):
+    first, _ = db.get_campaign(saved_id)["chapters"]
+    db.update_chapter_status(first["id"], "active")
+    assert db.get_campaign(saved_id)["chapters"][1]["status"] == "locked"
+
+
+def test_update_unknown_chapter_returns_none():
+    assert db.update_chapter_status("00000000-0000-0000-0000-000000000000", "done") is None
+    assert db.update_chapter_status("not-a-uuid", "done") is None
+
+
 def test_get_unknown_returns_none():
     assert db.get_campaign("00000000-0000-0000-0000-000000000000") is None
     assert db.get_campaign("not-a-uuid") is None

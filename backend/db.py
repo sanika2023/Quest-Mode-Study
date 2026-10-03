@@ -54,15 +54,39 @@ def get_campaign(campaign_id):
         "title": row["title"],
         "premise": row["campaign_json"]["premise"],
         "has_notes": row["has_notes"],
-        "chapters": [
-            {
-                "id": str(c["id"]),
-                "position": c["position"],
-                "title": c["title"],
-                "villains": c["villains_json"],
-                "status": c["status"],
-                **c["concepts_json"],
-            }
-            for c in chapters
-        ],
+        "chapters": [_chapter(c) for c in chapters],
     }
+
+
+def _chapter(row):
+    return {
+        "id": str(row["id"]),
+        "position": row["position"],
+        "title": row["title"],
+        "villains": row["villains_json"],
+        "status": row["status"],
+        **row["concepts_json"],
+    }
+
+
+def update_chapter_status(chapter_id, status):
+    """Set a chapter's status; finishing it activates the next locked chapter. Returns the chapter or None."""
+    try:
+        uuid.UUID(chapter_id)
+    except ValueError:
+        return None
+    with connect() as conn:
+        row = conn.execute(
+            "UPDATE chapters SET status = %s WHERE id = %s "
+            "RETURNING id, campaign_id, position, title, concepts_json, villains_json, status",
+            (status, chapter_id),
+        ).fetchone()
+        if row is None:
+            return None
+        if status == "done":
+            conn.execute(
+                "UPDATE chapters SET status = 'active' "
+                "WHERE campaign_id = %s AND position = %s AND status = 'locked'",
+                (row["campaign_id"], row["position"] + 1),
+            )
+    return _chapter(row)
