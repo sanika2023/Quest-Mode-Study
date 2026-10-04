@@ -10,7 +10,7 @@ A student adds notes. Gemini turns them into a fantasy campaign with one chapter
 
 - Tiger Data (PostgreSQL) is provisioned and the schema is applied.
 - Gemini is the only model dependency needed to start.
-- Built so far: build steps 1 and 2 (campaign creation and reading, citation check, Notes and Roadmap screens). Steps 1-4 are built (text review included). Fun break is a placeholder until step 7.
+- Built so far: build steps 1-5 (campaigns, citation check, timer and breaks, text review, grading, results and villains). Fun break is a placeholder until step 7.
 - **ElevenLabs is not available yet.** The app must run fully with `ELEVENLABS_API_KEY` unset. Build the review break in text mode first. Voice is a second provider behind the same interface.
 
 ## System diagram
@@ -150,7 +150,7 @@ sequenceDiagram
 | `PATCH /api/chapters/:id` | `status` | Chapter | Status is `locked`, `active`, or `done`. Setting `done` activates the next locked chapter. 400 for a bad status, 404 for an unknown id |
 | `POST /api/review/turn` | `chapter_id`, `mode`, `transcript` (turns before this one), `message`, optional `skip` (quiz only) | `{ reply, done }` | Text mode only. No `message` returns the opening turn, built from saved data with no model call. Quiz asks up to 3 saved questions; `skip: true` reveals the answer and moves on with no model call; teach-back ends after 3 student turns. 400 for a bad mode or transcript, an empty mid-conversation message, or teach-back on a chapter with no misconception; 404 unknown chapter; 502 model failure |
 | `GET /api/review/voice-token` | query: `chapter_id`, `mode` | `{ token, variables }` | Returns 503 when voice is not configured |
-| `POST /api/chapters/:id/grade` | `mode`, `transcript` | `{ results }` | Runs Call 2 and the citation check, writes `attempts` |
+| `POST /api/chapters/:id/grade` | `mode`, `transcript` | `{ results }` | Runs Call 2 and the citation check, writes `attempts`, and replaces the next chapter's `villains_json` with up to 2 missed or wrong concepts. Quiz: one result per question asked, `concept` is a short topic label from the model and `source_quote` is that question's saved quote (`prompts/grading_quiz.md`). Teach-back: results for the chapter concepts the conversation covered, names constrained by a schema enum (`prompts/grading.md`). `quote_verified` is `null` in topic-only mode. 400 for a bad mode or transcript or no student turns, 404 unknown chapter, 502 model failure |
 | `GET /api/campaigns/:id/progress` | | Attempts over time | Stretch, for the progress chart |
 
 ## Data shapes
@@ -332,7 +332,7 @@ quest-mode-study/
     src/
       App.tsx              # switches screens; restores the last campaign id from localStorage
       api/client.ts        # typed fetch wrappers; client.test.ts beside it
-      screens/             # Notes, Roadmap, SettingsPanel, Session, Focus, BreakChoice, BreakPlaceholder, Review (built); Results (to do)
+      screens/             # Notes, Roadmap, SettingsPanel, Session, Focus, BreakChoice, BreakPlaceholder, Review, Results (built)
       hooks/useCountdown.ts  # end-timestamp countdown
       lib/                 # timer.ts (durations, formatting), settings.ts (localStorage, default 25/5), brownNoise.ts; tests beside each
       review/

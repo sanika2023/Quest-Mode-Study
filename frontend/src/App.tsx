@@ -54,7 +54,7 @@ export default function App() {
       {loading ? (
         <p className="p-6 text-slate-400">Loading…</p>
       ) : campaign && active ? (
-        <Session chapter={active} settings={settings} onFinish={finishChapter} onAbandon={() => setActive(null)} />
+        <Session chapter={active} settings={settings} hasNotes={campaign.has_notes} onFinish={finishChapter} onAbandon={() => setActive(null)} />
       ) : campaign ? (
         <Roadmap campaign={campaign} settings={settings} onSettings={changeSettings} onStart={setActive} onNew={startNew} />
       ) : (

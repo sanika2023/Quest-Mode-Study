@@ -6,10 +6,6 @@ MAX_TEACHBACK_TURNS = 3
 _REPLY = {"type": "OBJECT", "properties": {"reply": {"type": "STRING"}}, "required": ["reply"]}
 
 
-def _history(transcript):
-    return "\n".join(f"{t['role'].capitalize()}: {t['text']}" for t in transcript) or "(none)"
-
-
 def _ask(prompt_name, **values):
     return gemini_client.generate_json(prompts.load(prompt_name, **values), schema=_REPLY)["reply"]
 
@@ -48,7 +44,7 @@ def _quiz_turn(chapter, transcript, message, skip):
             chapter_title=chapter["title"],
             question=asked["question"],
             reference_answer=asked["answer"],
-            transcript=_history(transcript),
+            transcript=prompts.format_transcript(transcript),
             message=message,
         )
     if answered >= len(questions):
@@ -67,7 +63,7 @@ def _teachback_turn(chapter, transcript, message):
         chapter_title=chapter["title"],
         wrong_claim=claim["wrong_claim"],
         correction=claim["correction"],
-        transcript=_history(transcript),
+        transcript=prompts.format_transcript(transcript),
         message=message,
     )
     turns = sum(t["role"] == "student" for t in transcript) + 1

@@ -9,3 +9,7 @@ def load(name, **values):
     for key, value in values.items():
         text = text.replace("{{" + key + "}}", str(value))
     return text
+
+
+def format_transcript(transcript):
+    return "\n".join(f"{t['role'].capitalize()}: {t['text']}" for t in transcript) or "(none)"

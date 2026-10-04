@@ -13,7 +13,7 @@ def _error(message, status):
     return jsonify(error=message), status
 
 
-def _valid_transcript(transcript):
+def valid_transcript(transcript):
     return isinstance(transcript, list) and all(
         isinstance(t, dict) and t.get("role") in ("character", "student") and isinstance(t.get("text"), str)
         for t in transcript
@@ -27,7 +27,7 @@ def review_turn():
     transcript = data.get("transcript", [])
     if mode not in ("quiz", "teachback"):
         return _error("mode must be quiz or teachback", 400)
-    if not _valid_transcript(transcript):
+    if not valid_transcript(transcript):
         return _error("transcript must be a list of {role, text}", 400)
     chapter = db.get_chapter(str(data.get("chapter_id")))
     if chapter is None:

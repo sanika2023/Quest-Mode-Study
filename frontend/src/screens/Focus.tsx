@@ -40,6 +40,19 @@ export default function Focus({ chapter, seconds, onDone, onAbandon }: Props) {
         ))}
       </ul>
 
+      {chapter.villains.length > 0 && (
+        <>
+          <h2 className="mt-6 text-sm uppercase tracking-wide text-red-300">Villains returning</h2>
+          <ul className="mt-2 space-y-1">
+            {chapter.villains.map((v) => (
+              <li key={v.name} className="rounded bg-red-950/60 p-2">
+                {v.name}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+
       <div className="mt-8 flex justify-center gap-4 text-sm">
         <button onClick={() => setMuted(!muted)} className="rounded bg-slate-800 px-3 py-1.5 hover:bg-slate-700">
           {muted ? 'Brown noise: off' : 'Brown noise: on'}

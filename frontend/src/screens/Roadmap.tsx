@@ -38,6 +38,9 @@ export default function Roadmap({ campaign, settings, onSettings, onStart, onNew
               <span className={`rounded px-2 py-0.5 text-xs ${BADGE[ch.status]}`}>{ch.status}</span>
             </div>
             <p className="mt-1 text-sm text-slate-400">{ch.story_beat}</p>
+            {ch.villains.length > 0 && (
+              <p className="mt-1 text-sm text-red-300">Villains: {ch.villains.map((v) => v.name).join(', ')}</p>
+            )}
             {ch.status === 'active' && (
               <button onClick={() => onStart(ch)} className="mt-3 rounded bg-indigo-600 px-4 py-1.5 text-sm font-semibold">
                 Start chapter
