@@ -11,11 +11,12 @@ type Phase = { name: 'focus' } | { name: 'choice' } | { name: 'break'; kind: Bre
 interface Props {
   chapter: Chapter
   settings: Settings
+  hasNotes: boolean
   onFinish: () => void
   onAbandon: () => void
 }
 
-export default function Session({ chapter, settings, onFinish, onAbandon }: Props) {
+export default function Session({ chapter, settings, hasNotes, onFinish, onAbandon }: Props) {
   const [phase, setPhase] = useState<Phase>({ name: 'focus' })
   const secs = durationsSec(settings)
 
@@ -24,6 +25,6 @@ export default function Session({ chapter, settings, onFinish, onAbandon }: Prop
       <Focus chapter={chapter} seconds={secs.focus} onDone={() => setPhase({ name: 'choice' })} onAbandon={onAbandon} />
     )
   if (phase.name === 'choice') return <BreakChoice onChoose={(kind) => setPhase({ name: 'break', kind })} />
-  if (phase.kind === 'review') return <Review chapter={chapter} seconds={secs.break} onFinish={onFinish} />
+  if (phase.kind === 'review') return <Review chapter={chapter} seconds={secs.break} hasNotes={hasNotes} onFinish={onFinish} />
   return <BreakPlaceholder kind={phase.kind} seconds={secs.break} onFinish={onFinish} />
 }

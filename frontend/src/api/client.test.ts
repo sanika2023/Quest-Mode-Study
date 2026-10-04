@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { createCampaign, getCampaign, reviewTurn, updateChapterStatus } from './client'
+import { createCampaign, getCampaign, gradeChapter, reviewTurn, updateChapterStatus } from './client'
 
 function mockFetch(status: number, body: unknown) {
   const fn = vi.fn().mockResolvedValue({
@@ -96,5 +96,23 @@ describe('reviewTurn', () => {
     expect(url).toBe('/api/review/turn')
     expect(init.method).toBe('POST')
     expect(JSON.parse(init.body)).toEqual(input)
+  })
+})
+
+describe('gradeChapter', () => {
+  it('posts mode and transcript and returns the results', async () => {
+    const results = [{ concept: 'ATP', verdict: 'missed' }]
+    const fetchMock = mockFetch(200, { results })
+    const transcript = [{ role: 'student' as const, text: 'x' }]
+    expect(await gradeChapter('ch1', 'quiz', transcript)).toEqual(results)
+    const [url, init] = fetchMock.mock.calls[0]
+    expect(url).toBe('/api/chapters/ch1/grade')
+    expect(init.method).toBe('POST')
+    expect(JSON.parse(init.body)).toEqual({ mode: 'quiz', transcript })
+  })
+
+  it('throws the server error', async () => {
+    mockFetch(502, { error: 'Grading failed. Please try again.' })
+    await expect(gradeChapter('ch1', 'quiz', [])).rejects.toThrow('Grading failed')
   })
 })

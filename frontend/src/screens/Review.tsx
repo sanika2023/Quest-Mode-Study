@@ -1,16 +1,18 @@
 import { useRef, useState } from 'react'
-import type { Chapter, ReviewMode, TranscriptTurn } from '../api/client'
+import { gradeChapter, type Chapter, type GradeResult, type ReviewMode, type TranscriptTurn } from '../api/client'
 import { useCountdown } from '../hooks/useCountdown'
 import { formatTime } from '../lib/timer'
 import { TextReview } from '../review/TextReview'
+import Results from './Results'
 
 interface Props {
   chapter: Chapter
   seconds: number
+  hasNotes: boolean
   onFinish: () => void
 }
 
-export default function Review({ chapter, seconds, onFinish }: Props) {
+export default function Review({ chapter, seconds, hasNotes, onFinish }: Props) {
   const left = useCountdown(seconds, () => {})
   const review = useRef(new TextReview())
   const [mode, setMode] = useState<ReviewMode | null>(null)
@@ -19,6 +21,7 @@ export default function Review({ chapter, seconds, onFinish }: Props) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [done, setDone] = useState(false)
+  const [results, setResults] = useState<GradeResult[] | null>(null)
 
   async function run(action: () => Promise<void>) {
     setBusy(true)
@@ -28,6 +31,19 @@ export default function Review({ chapter, seconds, onFinish }: Props) {
       setDone(review.current.done)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function grade() {
+    if (!mode) return
+    setBusy(true)
+    setError('')
+    try {
+      setResults(await gradeChapter(chapter.id, mode, await review.current.end()))
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Grading failed')
     } finally {
       setBusy(false)
     }
@@ -100,11 +116,17 @@ export default function Review({ chapter, seconds, onFinish }: Props) {
 
       {error && <p className="mt-4 rounded bg-red-900/50 p-3 text-red-200">{error}</p>}
 
-      {done ? (
+      {results ? (
+        <Results results={results} hasNotes={hasNotes} onFinish={onFinish} />
+      ) : done ? (
         <div className="mt-6">
-          <p className="text-slate-300">Review complete. Grading comes next.</p>
-          <button onClick={onFinish} className="mt-4 rounded bg-indigo-600 px-5 py-2 font-semibold">
-            Finish chapter
+          <p className="text-slate-300">Review complete.</p>
+          <button
+            onClick={grade}
+            disabled={busy}
+            className="mt-4 rounded bg-indigo-600 px-5 py-2 font-semibold disabled:opacity-40"
+          >
+            {busy ? 'Grading…' : error ? 'Retry grading' : 'See results'}
           </button>
         </div>
       ) : (

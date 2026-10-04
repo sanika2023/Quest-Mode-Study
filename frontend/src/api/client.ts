@@ -106,3 +106,26 @@ export function reviewTurn(input: ReviewTurnInput): Promise<{ reply: string; don
     body: JSON.stringify(input),
   })
 }
+
+export type Verdict = 'correct' | 'partial' | 'missed' | 'wrong'
+
+export interface GradeResult {
+  concept: string
+  verdict: Verdict
+  student_said: string
+  source_quote: string
+  quote_verified: boolean | null
+}
+
+export async function gradeChapter(
+  chapterId: string,
+  mode: ReviewMode,
+  transcript: TranscriptTurn[],
+): Promise<GradeResult[]> {
+  const res = await request<{ results: GradeResult[] }>(`/api/chapters/${chapterId}/grade`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ mode, transcript }),
+  })
+  return res.results
+}
