@@ -38,16 +38,20 @@ export default function Notes({ onCreated }: { onCreated: (c: Campaign) => void 
   }
 
   return (
-    <div className="mx-auto max-w-2xl p-6">
-      <h1 className="text-3xl font-bold">Begin a quest</h1>
-      <p className="mt-1 text-slate-400">Turn your notes into a campaign. One chapter per study block.</p>
+    <div className="mx-auto max-w-5xl p-6">
+      <h1 className="rune-title text-5xl">Begin a Quest</h1>
+      <p className="mt-2 text-violet-200/70">Offer your notes to the archive. Each study block becomes a chapter of your legend.</p>
 
-      <div className="mt-6 flex gap-2">
+      <div className="mt-8 flex gap-2">
         {MODES.map((m) => (
           <button
             key={m.id}
             onClick={() => setMode(m.id)}
-            className={`rounded px-3 py-1.5 text-sm ${mode === m.id ? 'bg-indigo-600' : 'bg-slate-800 hover:bg-slate-700'}`}
+            className={`rounded-full border px-4 py-1.5 text-sm transition ${
+              mode === m.id
+                ? 'border-teal-300/60 bg-violet-600/50 text-white shadow-[0_0_12px_-2px_rgba(139,92,246,0.8)]'
+                : 'border-violet-400/20 bg-indigo-950/60 text-violet-200/80 hover:border-violet-300/50'
+            }`}
           >
             {m.label}
           </button>
@@ -61,7 +65,7 @@ export default function Notes({ onCreated }: { onCreated: (c: Campaign) => void 
             onChange={(e) => setText(e.target.value)}
             rows={10}
             placeholder="Paste your notes here"
-            className="w-full rounded bg-slate-800 p-3"
+            className="field w-full"
           />
         )}
         {mode === 'pdf' && (
@@ -69,7 +73,7 @@ export default function Notes({ onCreated }: { onCreated: (c: Campaign) => void 
             type="file"
             accept="application/pdf"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            className="w-full rounded bg-slate-800 p-3"
+            className="field w-full file:mr-4 file:rounded-md file:border-0 file:bg-violet-600 file:px-3 file:py-1 file:text-white"
           />
         )}
         {mode === 'topic' && (
@@ -77,19 +81,19 @@ export default function Notes({ onCreated }: { onCreated: (c: Campaign) => void 
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             placeholder="e.g. Cell biology"
-            className="w-full rounded bg-slate-800 p-3"
+            className="field w-full"
           />
         )}
         {mode === 'topic' && (
-          <p className="mt-1 text-xs text-slate-500">Without notes, results are not checked against your material.</p>
+          <p className="mt-1 text-xs text-violet-300/50">Without notes, results are not checked against your material.</p>
         )}
       </div>
 
-      <label className="mt-6 block text-sm text-slate-400">Session length</label>
+      <label className="label mt-6 block">Session length</label>
       <select
         value={minutes}
         onChange={(e) => setMinutes(Number(e.target.value))}
-        className="mt-1 rounded bg-slate-800 p-2"
+        className="field mt-2 p-2"
       >
         {LENGTHS.map((m) => (
           <option key={m} value={m}>
@@ -98,14 +102,10 @@ export default function Notes({ onCreated }: { onCreated: (c: Campaign) => void 
         ))}
       </select>
 
-      {error && <p className="mt-4 rounded bg-red-900/50 p-3 text-red-200">{error}</p>}
+      {error && <p className="mt-4 rounded-lg border border-red-400/30 bg-red-950/60 p-3 text-red-200">{error}</p>}
 
-      <button
-        onClick={submit}
-        disabled={!ready || busy}
-        className="mt-6 rounded bg-indigo-600 px-5 py-2 font-semibold disabled:opacity-40"
-      >
-        {busy ? 'Forging your campaign… (up to a minute)' : 'Generate campaign'}
+      <button onClick={submit} disabled={!ready || busy} className={`btn mt-8 block ${busy ? 'animate-pulse' : ''}`}>
+        {busy ? 'Forging your campaign… (up to a minute)' : '✦ Forge campaign'}
       </button>
     </div>
   )

@@ -42,6 +42,17 @@ def test_grade_returns_results_and_records_them(client, fakes):
     assert fakes["record"] == ("ch1", "quiz", RESULTS, ["villain"])
 
 
+def test_practice_grades_without_recording(client, fakes):
+    res = post(client, practice=True)
+    assert res.status_code == 200
+    assert res.get_json() == {"results": RESULTS}
+    assert "record" not in fakes
+
+
+def test_practice_must_be_boolean(client, fakes):
+    assert post(client, practice="yes").status_code == 400
+
+
 def test_unknown_chapter_is_404(client, fakes):
     assert post(client, chapter_id="nope").status_code == 404
 

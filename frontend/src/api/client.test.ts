@@ -108,7 +108,13 @@ describe('gradeChapter', () => {
     const [url, init] = fetchMock.mock.calls[0]
     expect(url).toBe('/api/chapters/ch1/grade')
     expect(init.method).toBe('POST')
-    expect(JSON.parse(init.body)).toEqual({ mode: 'quiz', transcript })
+    expect(JSON.parse(init.body)).toEqual({ mode: 'quiz', transcript, practice: false })
+  })
+
+  it('sends the practice flag', async () => {
+    const fetchMock = mockFetch(200, { results: [] })
+    await gradeChapter('ch1', 'teachback', [], true)
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).practice).toBe(true)
   })
 
   it('throws the server error', async () => {

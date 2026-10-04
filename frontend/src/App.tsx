@@ -12,6 +12,7 @@ export default function App() {
   const [campaign, setCampaign] = useState<Campaign | null>(null)
   const [settings, setSettings] = useState<Settings>(loadSettings)
   const [active, setActive] = useState<Chapter | null>(null)
+  const [practice, setPractice] = useState(false)
   const [loading, setLoading] = useState(() => !!localStorage.getItem(KEY))
 
   // Reload restores the saved campaign from the database; it never calls the model.
@@ -44,19 +45,42 @@ export default function App() {
     }
   }
 
+  function start(chapter: Chapter, isPractice: boolean) {
+    setPractice(isPractice)
+    setActive(chapter)
+  }
+
   function startNew() {
     localStorage.removeItem(KEY)
     setCampaign(null)
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100">
+    <div className="min-h-screen text-violet-50">
+      <header className="mx-auto flex max-w-5xl items-center gap-2 px-6 pt-5">
+        <img src="/crystal.svg" alt="" className="h-7 w-7 drop-shadow-[0_0_8px_rgba(167,139,250,0.8)]" />
+        <span className="font-display text-sm tracking-[0.2em] text-violet-200/90">QUEST-MODE STUDY</span>
+      </header>
       {loading ? (
-        <p className="p-6 text-slate-400">Loading…</p>
+        <p className="p-6 text-violet-300/70">Loading…</p>
       ) : campaign && active ? (
-        <Session chapter={active} settings={settings} hasNotes={campaign.has_notes} onFinish={finishChapter} onAbandon={() => setActive(null)} />
+        <Session
+          chapter={active}
+          settings={settings}
+          hasNotes={campaign.has_notes}
+          practice={practice}
+          onFinish={finishChapter}
+          onAbandon={() => setActive(null)}
+        />
       ) : campaign ? (
-        <Roadmap campaign={campaign} settings={settings} onSettings={changeSettings} onStart={setActive} onNew={startNew} />
+        <Roadmap
+          campaign={campaign}
+          settings={settings}
+          onSettings={changeSettings}
+          onStart={(ch) => start(ch, false)}
+          onDemoBreaks={(ch) => start(ch, true)}
+          onNew={startNew}
+        />
       ) : (
         <Notes onCreated={created} />
       )}

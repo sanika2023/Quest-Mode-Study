@@ -23,6 +23,9 @@ def grade_chapter(chapter_id):
         return _error("mode must be quiz or teachback", 400)
     if not valid_transcript(transcript):
         return _error("transcript must be a list of {role, text}", 400)
+    practice = data.get("practice", False)
+    if not isinstance(practice, bool):
+        return _error("practice must be a boolean", 400)
     chapter = db.get_chapter(chapter_id)
     if chapter is None:
         return _error("Chapter not found", 404)
@@ -33,5 +36,7 @@ def grade_chapter(chapter_id):
     except Exception:
         log.exception("grading failed")
         return _error("Grading failed. Please try again.", 502)
-    db.record_grading(chapter_id, mode, results, grading_service.villains_for(chapter, results))
+    # Practice runs (demo breaks) leave attempts and villains untouched.
+    if not practice:
+        db.record_grading(chapter_id, mode, results, grading_service.villains_for(chapter, results))
     return jsonify(results=results)

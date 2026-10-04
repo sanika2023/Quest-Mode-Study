@@ -1,55 +1,60 @@
 import type { GradeResult, Verdict } from '../api/client'
 
 const BADGE: Record<Verdict, string> = {
-  correct: 'bg-emerald-700',
-  partial: 'bg-amber-600',
-  missed: 'bg-red-700',
-  wrong: 'bg-red-700',
+  correct: 'border-emerald-300/50 bg-emerald-600/30 text-emerald-100',
+  partial: 'border-amber-300/50 bg-amber-600/30 text-amber-100',
+  missed: 'border-rose-300/50 bg-rose-700/30 text-rose-100',
+  wrong: 'border-rose-300/50 bg-rose-700/30 text-rose-100',
 }
 
 interface Props {
   results: GradeResult[]
   hasNotes: boolean
+  practice: boolean
+  finishLabel: string
   onFinish: () => void
 }
 
-export default function Results({ results, hasNotes, onFinish }: Props) {
+export default function Results({ results, hasNotes, practice, finishLabel, onFinish }: Props) {
   const villains = results.filter((r) => r.verdict === 'missed' || r.verdict === 'wrong')
 
   return (
-    <div className="mt-6">
-      <h2 className="text-xl font-semibold">Results</h2>
-      {!hasNotes && <p className="mt-1 text-xs text-slate-500">Not checked against notes.</p>}
-      {results.length === 0 && <p className="mt-2 text-slate-400">No concepts were covered in this review.</p>}
+    <div className="mt-8">
+      <h2 className="rune-title text-3xl">The Verdict</h2>
+      {!hasNotes && <p className="mt-1 text-xs text-violet-300/50">Not checked against notes.</p>}
+      {results.length === 0 && <p className="mt-2 text-violet-200/70">No concepts were covered in this review.</p>}
 
-      <ul className="mt-3 space-y-3">
+      <ul className="mt-4 space-y-3">
         {results.map((r) => (
-          <li key={r.concept} className="rounded bg-slate-800 p-3">
-            <div className="flex items-center justify-between">
-              <span className="font-semibold">{r.concept}</span>
-              <span className={`rounded px-2 py-0.5 text-xs ${BADGE[r.verdict]}`}>{r.verdict}</span>
+          <li key={r.concept} className="panel p-4">
+            <div className="flex items-center justify-between gap-3">
+              <span className="font-display text-violet-50">{r.concept}</span>
+              <span className={`rounded-full border px-3 py-0.5 text-xs uppercase tracking-wider ${BADGE[r.verdict]}`}>
+                {r.verdict}
+              </span>
             </div>
-            <p className="mt-1 text-sm text-slate-400">You said: {r.student_said}</p>
+            <p className="mt-2 text-sm text-violet-200/70">You said: {r.student_said}</p>
             {r.quote_verified === true && (
-              <blockquote className="mt-2 border-l-2 border-slate-600 pl-3 text-sm italic text-slate-300">
-                "{r.source_quote}"
+              <blockquote className="mt-3 border-l-2 border-teal-300/60 pl-3 text-sm italic text-teal-100/90">
+                📜 "{r.source_quote}"
               </blockquote>
             )}
             {r.quote_verified === false && (
-              <p className="mt-2 text-xs text-slate-500">Source quote could not be verified against your notes.</p>
+              <p className="mt-2 text-xs text-violet-300/50">Source quote could not be verified against your notes.</p>
             )}
           </li>
         ))}
       </ul>
 
       {villains.length > 0 && (
-        <p className="mt-4 text-sm text-red-300">
-          {villains.map((v) => v.concept).join(', ')} will return as a villain in the next chapter.
+        <p className="mt-5 rounded-xl border border-rose-400/30 bg-rose-950/50 p-3 text-sm text-rose-200">
+          ☠ {villains.map((v) => v.concept).join(', ')} {practice ? 'would return' : 'will return'} as{' '}
+          {villains.length > 1 ? 'villains' : 'a villain'} in the next chapter{practice ? ' (practice, not saved)' : ''}.
         </p>
       )}
 
-      <button onClick={onFinish} className="mt-6 rounded bg-indigo-600 px-5 py-2 font-semibold">
-        Finish chapter
+      <button onClick={onFinish} className="btn mt-6">
+        {finishLabel}
       </button>
     </div>
   )
