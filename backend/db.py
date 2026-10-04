@@ -83,6 +83,36 @@ def get_chapter(chapter_id):
     return _chapter(row) if row else None
 
 
+def get_notes(chapter_id):
+    """The notes text of the chapter's campaign, or None (unknown chapter or topic-only)."""
+    try:
+        uuid.UUID(chapter_id)
+    except ValueError:
+        return None
+    with connect() as conn:
+        row = conn.execute(
+            "SELECT c.notes_text FROM campaigns c JOIN chapters ch ON ch.campaign_id = c.id WHERE ch.id = %s",
+            (chapter_id,),
+        ).fetchone()
+    return row["notes_text"] if row else None
+
+
+def record_grading(chapter_id, mode, results, villains):
+    """Store one attempt row per result and replace the next chapter's villains."""
+    with connect() as conn:
+        for r in results:
+            conn.execute(
+                "INSERT INTO attempts (chapter_id, concept, mode, verdict) VALUES (%s, %s, %s, %s)",
+                (chapter_id, r["concept"], mode, r["verdict"]),
+            )
+        conn.execute(
+            "UPDATE chapters SET villains_json = %s "
+            "WHERE campaign_id = (SELECT campaign_id FROM chapters WHERE id = %s) "
+            "AND position = (SELECT position + 1 FROM chapters WHERE id = %s)",
+            (Jsonb(villains), chapter_id, chapter_id),
+        )
+
+
 def update_chapter_status(chapter_id, status):
     """Set a chapter's status; finishing it activates the next locked chapter. Returns the chapter or None."""
     try:

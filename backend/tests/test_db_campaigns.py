@@ -94,3 +94,34 @@ def test_get_chapter(saved_id):
     assert got["title"] == "One" and got["concepts"][0]["name"] == "A"
     assert db.get_chapter("not-a-uuid") is None
     assert db.get_chapter("00000000-0000-0000-0000-000000000000") is None
+
+
+def test_record_grading_writes_attempts_and_sets_next_villains(saved_id):
+    first, second = db.get_campaign(saved_id)["chapters"]
+    villain = {"name": "A", "explanation": "x", "source_quote": "q"}
+    results = [{"concept": "A", "verdict": "missed"}, {"concept": "B", "verdict": "correct"}]
+    db.record_grading(first["id"], "quiz", results, [villain])
+    assert db.get_campaign(saved_id)["chapters"][1]["villains"] == [villain]
+    with db.connect() as conn:
+        rows = conn.execute(
+            "SELECT concept, verdict, mode FROM attempts WHERE chapter_id = %s ORDER BY concept", (first["id"],)
+        ).fetchall()
+        conn.execute("DELETE FROM attempts WHERE chapter_id = %s", (first["id"],))
+    assert rows == [
+        {"concept": "A", "verdict": "missed", "mode": "quiz"},
+        {"concept": "B", "verdict": "correct", "mode": "quiz"},
+    ]
+
+
+def test_regrading_replaces_villains_and_last_chapter_is_fine(saved_id):
+    first, second = db.get_campaign(saved_id)["chapters"]
+    db.record_grading(first["id"], "quiz", [], [{"name": "A"}])
+    db.record_grading(first["id"], "quiz", [], [])
+    assert db.get_campaign(saved_id)["chapters"][1]["villains"] == []
+    db.record_grading(second["id"], "quiz", [], [{"name": "A"}])
+
+
+def test_get_notes(saved_id):
+    first, _ = db.get_campaign(saved_id)["chapters"]
+    assert db.get_notes(first["id"]) == "the notes"
+    assert db.get_notes("not-a-uuid") is None
