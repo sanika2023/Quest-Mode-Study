@@ -30,6 +30,15 @@ Model output is checked before you see it:
 - Grading sees only the transcript and the chapter data, and each quiz verdict is tied to the question that was actually asked.
 - All Gemini calls use structured JSON output with a retry and a fallback model.
 
+### Eval
+
+`backend/eval/run_eval.py` generates campaigns from three sets of student-style notes (cell biology, World War I, databases) and checks the raw model output, before any filtering. The latest run ([report](backend/eval/results/report.md)):
+
+- **Citation pass rate: 100% (84/84 quotes)**, including all 36 quiz questions, on clean typed notes.
+- **Grading agreement: 100% (35/35)** on scripted answers with known verdicts: the reference answer (correct), "I don't know" (missed), and an answer to a different question (wrong). These are clear-cut cases; nuanced partial answers are not measured yet.
+
+Run it from `backend/` with `.\.venv\Scripts\python.exe eval\run_eval.py` (makes real Gemini calls, writes nothing to the database).
+
 ## Demo tips
 
 - **Demo mode** (toggle on the roadmap) shortens focus to 20 seconds and breaks to 15 seconds.
@@ -105,10 +114,11 @@ docs/ARCHITECTURE.md
 
 Working end to end: notes to campaign, pomodoro timer with brown noise, fun and review breaks, cited grading, and villains carried into the next chapter.
 
+Done: the eval (citation pass rate and grading agreement), with results in the [Eval](#eval) section above.
+
 Planned:
 
 - **Voice review with ElevenLabs.** Talk to Orin and Pip instead of typing. The review already runs behind a provider interface, so voice will be a second provider next to `TextReview`.
-- **Eval.** Measure how often generated quotes pass the citation check across several sets of sample notes.
 - Narrated chapter intros, a doodle pad for fun breaks, a progress chart, and deployment.
 
 ## Credits

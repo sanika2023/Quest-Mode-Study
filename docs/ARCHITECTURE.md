@@ -10,7 +10,7 @@ A student adds notes. Gemini turns them into a fantasy campaign with one chapter
 
 - Tiger Data (PostgreSQL) is provisioned and the schema is applied.
 - Gemini is the only model dependency needed to start.
-- Built so far: build steps 1-5 (campaigns, citation check, timer and breaks, text review, grading, results and villains), plus step 7 box breathing and the arcane night styling.
+- Built so far: build steps 1-5 (campaigns, citation check, timer and breaks, text review, grading, results and villains), plus step 7 box breathing and the arcane night styling, and step 8 eval (`backend/eval/`).
 - **ElevenLabs is not available yet.** The app must run fully with `ELEVENLABS_API_KEY` unset. Build the review break in text mode first. Voice is a second provider behind the same interface.
 
 ## System diagram
@@ -241,6 +241,8 @@ Grading result, the output of Call 2:
 4. In Call 2 output, keep the verdict but set `quote_verified` to false and hide the quote in the UI.
 5. Log every pass and fail. The pass rate is the eval number.
 
+`backend/eval/run_eval.py` measures it on raw Call 1 output (before step 3 drops anything), then grades scripted answers with known verdicts to measure grading agreement. It writes `eval/results/report.md` and never touches the database. First run (2026-10-04): 100% of 84 quotes passed; grading agreed on 35/35 clear-cut answers.
+
 PDFs are converted to plain text in Flask (for example with `pypdf`) and stored in `campaigns.notes_text`. The model and the citation check both read that same text.
 
 In topic-only mode there are no notes. Skip the check and show the results as "not checked against notes".
@@ -324,8 +326,9 @@ quest-mode-study/
       character_quiz.md, character_teachback.md  # shared by text mode and the ElevenLabs agent
       grading.md
     eval/
-      run_eval.py          # citation pass rate over sample notes
-      sample_notes/
+      run_eval.py          # citation pass rate (raw output) and grading agreement on scripted answers; no DB writes
+      sample_notes/        # 3 student-style notes (.txt)
+      results/report.md    # latest eval report
     requirements.txt
   frontend/
     vite.config.ts         # Tailwind plugin, /api proxy to :5000, Vitest
@@ -377,4 +380,4 @@ quest-mode-study/
 4. `TextReview` and `POST /api/review/turn`, for quiz and teach-back.
 5. Grading, results screen, villains carried into the next chapter. **The full loop works here, with no ElevenLabs.**
 6. `VoiceReview` and `voice_token`, once ElevenLabs is available.
-7. Box breathing, styling, eval run, then stretch items.
+7. Box breathing, styling, eval run, then stretch items. **Done except stretch items** (box breathing, free activity, styling, demo breaks, eval).
