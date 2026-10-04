@@ -1,0 +1,37 @@
+CSC 3410 Databases - midterm review notes
+
+Relational model basics
+A relational database stores data in tables, also called relations. Each row is a record (tuple) and each column is an attribute. A primary key is a column, or set of columns, that uniquely identifies each row in a table. A primary key can never be NULL. A foreign key is a column that refers to the primary key of another table, which links the two tables together. Referential integrity means every foreign key value must match an existing primary key value (or be NULL).
+
+SQL essentials
+- SELECT picks columns, FROM names the table, WHERE filters rows.
+- ORDER BY sorts the result; add DESC for descending order.
+- GROUP BY puts rows with the same value into groups, usually with an aggregate like COUNT, SUM, or AVG.
+- HAVING filters groups after GROUP BY, while WHERE filters individual rows before grouping.
+- INSERT adds rows, UPDATE changes existing rows, and DELETE removes rows.
+Remember: an UPDATE or DELETE without a WHERE clause affects every row in the table!
+
+Joins
+- An INNER JOIN returns only the rows that have matching values in both tables.
+- A LEFT JOIN returns all rows from the left table, plus matching rows from the right table, with NULLs where there is no match.
+- A CROSS JOIN returns every combination of rows from the two tables (the Cartesian product).
+
+Normalization
+Normalization organizes tables to reduce redundancy and avoid update anomalies.
+- 1NF: every column holds atomic values, with no repeating groups or lists in a single cell.
+- 2NF: the table is in 1NF and every non-key column depends on the whole primary key, not just part of it.
+- 3NF: the table is in 2NF and no non-key column depends on another non-key column (no transitive dependencies).
+Denormalization is sometimes done on purpose to make reads faster, at the cost of extra storage and harder updates.
+
+Indexes
+An index is a separate data structure, usually a B-tree, that speeds up lookups on a column. Indexes make reads faster but make inserts and updates slower, because the index has to be updated too. Primary keys are indexed automatically in most databases.
+
+Transactions and ACID
+A transaction is a group of operations that is treated as one unit of work.
+- Atomicity: either all operations in the transaction happen or none of them do.
+- Consistency: a transaction moves the database from one valid state to another.
+- Isolation: concurrent transactions do not see each other's partial changes.
+- Durability: once a transaction commits, its changes survive crashes.
+COMMIT saves the transaction's changes, and ROLLBACK undoes them.
+
+Prof's warning for the exam: a primary key is not the same as an index, even though the database builds an index for it.

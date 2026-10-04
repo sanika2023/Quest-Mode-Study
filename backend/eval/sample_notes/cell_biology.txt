@@ -1,0 +1,32 @@
+BIO 1510 - Unit 3 notes: Cells
+
+Cell theory
+- All living things are made of one or more cells.
+- The cell is the basic unit of structure and function in living things.
+- All cells come from pre-existing cells (Virchow, 1855).
+
+Prokaryotes vs eukaryotes
+Prokaryotic cells have no nucleus; their DNA sits in a region called the nucleoid. Bacteria and archaea are prokaryotes. Eukaryotic cells have a membrane-bound nucleus and membrane-bound organelles. Eukaryotic cells are usually 10 to 100 times larger than prokaryotic cells.
+Things ALL cells share: a plasma membrane, cytoplasm, ribosomes, and DNA.
+
+Organelles (know function!)
+- Nucleus: stores the cell's DNA and controls gene expression. Surrounded by a double membrane called the nuclear envelope.
+- Ribosomes: make proteins by translating mRNA. Found free in the cytoplasm or attached to the rough ER.
+- Rough ER: studded with ribosomes, folds and modifies proteins that will be secreted or sent to membranes.
+- Smooth ER: makes lipids and detoxifies drugs and poisons. Liver cells have a lot of smooth ER.
+- Golgi apparatus: modifies, sorts, and packages proteins into vesicles for shipping. Think of it as the post office of the cell.
+- Mitochondria: site of cellular respiration, where glucose is broken down to make ATP. Mitochondria have their own DNA, which supports the endosymbiotic theory.
+- Lysosomes: contain digestive enzymes that break down worn-out organelles and food particles. Mostly found in animal cells.
+- Cytoskeleton: a network of protein fibers that gives the cell its shape and helps it move.
+
+Plant cells vs animal cells
+Plant cells have a cell wall made of cellulose, which gives them a rigid shape. Plant cells have chloroplasts, where photosynthesis turns light energy into chemical energy. Plant cells usually have one large central vacuole that stores water and keeps the cell firm (turgor pressure). Animal cells have no cell wall, so their shape is more flexible. Animal cells have centrioles, which help organize cell division.
+
+Plasma membrane
+The plasma membrane is a phospholipid bilayer with embedded proteins. It is selectively permeable, meaning it controls what enters and leaves the cell. The fluid mosaic model describes the membrane as a flexible layer with proteins floating in it.
+- Small nonpolar molecules like O2 and CO2 diffuse straight through the bilayer.
+- Diffusion moves molecules from high concentration to low concentration and needs no energy.
+- Osmosis is the diffusion of water across a membrane.
+- Active transport moves molecules against their concentration gradient and requires ATP. Example: the sodium-potassium pump.
+
+Exam tip from Dr. Reyes: the mitochondria do NOT make energy from nothing, they convert the chemical energy in glucose into ATP.
