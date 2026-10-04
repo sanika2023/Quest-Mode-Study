@@ -24,40 +24,43 @@ export default function Focus({ chapter, seconds, onDone, onAbandon }: Props) {
   }, [muted])
 
   return (
-    <div className="mx-auto max-w-2xl p-6 text-center">
-      <p className="text-sm text-slate-400">
-        Chapter {chapter.position}: {chapter.title}
-      </p>
-      <p className="mt-6 font-mono text-7xl font-bold">{formatTime(left)}</p>
-      <p className="mt-6 italic text-slate-300">{chapter.story_beat}</p>
+    <div className="mx-auto max-w-5xl p-6 text-center">
+      <p className="label">Chapter {chapter.position}</p>
+      <h1 className="font-display text-xl text-violet-100">{chapter.title}</h1>
 
-      <h2 className="mt-8 text-sm uppercase tracking-wide text-slate-400">Quest objectives</h2>
-      <ul className="mt-2 space-y-1">
+      <div className="mx-auto mt-8 flex h-56 w-56 items-center justify-center rounded-full border-2 border-violet-300/40 bg-indigo-950/60 shadow-[0_0_60px_-10px_rgba(139,92,246,0.8),inset_0_0_40px_-10px_rgba(94,234,212,0.5)]">
+        <p className="font-mono text-6xl font-bold text-violet-50">{formatTime(left)}</p>
+      </div>
+
+      <p className="mt-8 italic text-violet-200/80">{chapter.story_beat}</p>
+
+      <h2 className="label mt-10">Quest objectives</h2>
+      <ul className="mt-3 space-y-2">
         {chapter.concepts.map((c) => (
-          <li key={c.name} className="rounded bg-slate-800 p-2">
-            {c.name}
+          <li key={c.name} className="panel p-2.5">
+            ✦ {c.name}
           </li>
         ))}
       </ul>
 
       {chapter.villains.length > 0 && (
         <>
-          <h2 className="mt-6 text-sm uppercase tracking-wide text-red-300">Villains returning</h2>
-          <ul className="mt-2 space-y-1">
+          <h2 className="label mt-8 !text-rose-300">Villains returning</h2>
+          <ul className="mt-3 space-y-2">
             {chapter.villains.map((v) => (
-              <li key={v.name} className="rounded bg-red-950/60 p-2">
-                {v.name}
+              <li key={v.name} className="rounded-xl border border-rose-400/30 bg-rose-950/50 p-2.5 text-rose-100">
+                ☠ {v.name}
               </li>
             ))}
           </ul>
         </>
       )}
 
-      <div className="mt-8 flex justify-center gap-4 text-sm">
-        <button onClick={() => setMuted(!muted)} className="rounded bg-slate-800 px-3 py-1.5 hover:bg-slate-700">
-          {muted ? 'Brown noise: off' : 'Brown noise: on'}
+      <div className="mt-10 flex items-center justify-center gap-6">
+        <button onClick={() => setMuted(!muted)} className="panel px-4 py-1.5 text-sm hover:border-teal-300/50">
+          {muted ? '🔇 Brown noise: off' : '🔊 Brown noise: on'}
         </button>
-        <button onClick={onAbandon} className="text-slate-400 underline">
+        <button onClick={onAbandon} className="btn-ghost">
           Abandon chapter
         </button>
       </div>

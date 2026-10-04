@@ -1,1 +1,53 @@
 @import "tailwindcss";
+
+@theme {
+  --font-display: "Cinzel", serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background-color: #0e0a26;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, #fff8, transparent),
+    radial-gradient(1px 1px at 72% 9%, #fff6, transparent),
+    radial-gradient(1.5px 1.5px at 38% 62%, #c4b5fd88, transparent),
+    radial-gradient(1px 1px at 88% 44%, #fff5, transparent),
+    radial-gradient(1px 1px at 22% 84%, #5eead477, transparent),
+    radial-gradient(1.5px 1.5px at 58% 30%, #fff4, transparent),
+    radial-gradient(1px 1px at 92% 82%, #c4b5fd66, transparent),
+    radial-gradient(ellipse at 50% -10%, #3b1d7a 0%, transparent 60%),
+    radial-gradient(ellipse at 100% 100%, #144e5a 0%, transparent 52%),
+    radial-gradient(ellipse at 0% 100%, #36206a 0%, transparent 50%),
+    linear-gradient(to bottom, transparent 45%, #1e1545 100%);
+  background-size: 420px 420px, 380px 380px, 520px 520px, 460px 460px, 400px 400px, 560px 560px, 340px 340px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+  background-attachment: fixed;
+}
+
+@layer components {
+  .panel {
+    @apply rounded-xl border border-violet-400/20 bg-indigo-950/60 shadow-[0_0_24px_-8px_rgba(139,92,246,0.45)] backdrop-blur-sm;
+  }
+  .btn {
+    @apply rounded-lg bg-gradient-to-r from-violet-600 to-teal-600 px-5 py-2 font-display font-semibold tracking-wide text-white shadow-[0_0_16px_-2px_rgba(139,92,246,0.7)] transition hover:brightness-110 disabled:opacity-40 disabled:shadow-none;
+  }
+  .btn-ghost {
+    @apply text-sm text-violet-300/70 underline-offset-4 hover:text-violet-200 hover:underline disabled:opacity-40;
+  }
+  .field {
+    @apply rounded-lg border border-violet-400/20 bg-indigo-950/70 p-3 outline-none focus:border-teal-400/60;
+  }
+  .rune-title {
+    @apply font-display font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-violet-200 via-fuchsia-200 to-teal-200;
+  }
+  .label {
+    @apply font-display text-xs uppercase tracking-[0.2em] text-violet-300/70;
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
