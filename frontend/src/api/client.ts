@@ -121,11 +121,12 @@ export async function gradeChapter(
   chapterId: string,
   mode: ReviewMode,
   transcript: TranscriptTurn[],
+  practice = false,
 ): Promise<GradeResult[]> {
   const res = await request<{ results: GradeResult[] }>(`/api/chapters/${chapterId}/grade`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ mode, transcript }),
+    body: JSON.stringify({ mode, transcript, practice }),
   })
   return res.results
 }
