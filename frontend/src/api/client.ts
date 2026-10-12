@@ -76,6 +76,20 @@ export function getCampaign(id: string): Promise<Campaign> {
   return request(`/api/campaigns/${id}`)
 }
 
+export type Verdict = 'correct' | 'partial' | 'missed' | 'wrong'
+
+export interface Summary {
+  chapters_total: number
+  chapters_done: number
+  reviews: number
+  counts: Record<Verdict, number>
+  revisit: { chapter: string; concept: string; verdict: Verdict }[]
+}
+
+export function getSummary(campaignId: string): Promise<Summary> {
+  return request(`/api/campaigns/${campaignId}/summary`)
+}
+
 export function updateChapterStatus(id: string, status: ChapterStatus): Promise<Chapter> {
   return request(`/api/chapters/${id}`, {
     method: 'PATCH',
@@ -106,8 +120,6 @@ export function reviewTurn(input: ReviewTurnInput): Promise<{ reply: string; don
     body: JSON.stringify(input),
   })
 }
-
-export type Verdict = 'correct' | 'partial' | 'missed' | 'wrong'
 
 export interface GradeResult {
   concept: string

@@ -60,3 +60,11 @@ def get_campaign(campaign_id):
     if campaign is None:
         return _error("Campaign not found", 404)
     return jsonify(campaign)
+
+
+@bp.get("/api/campaigns/<campaign_id>/summary")
+def get_summary(campaign_id):
+    summary = db.get_summary(campaign_id)
+    if summary is None:
+        return _error("Campaign not found", 404)
+    return jsonify(summary)

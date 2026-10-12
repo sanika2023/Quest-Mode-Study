@@ -3,6 +3,7 @@ import { getCampaign, updateChapterStatus, type Campaign, type Chapter } from '.
 import { loadSettings, saveSettings } from './lib/settings'
 import type { Settings } from './lib/timer'
 import Notes from './screens/Notes'
+import QuestComplete from './screens/QuestComplete'
 import Roadmap from './screens/Roadmap'
 import Session from './screens/Session'
 
@@ -13,6 +14,7 @@ export default function App() {
   const [settings, setSettings] = useState<Settings>(loadSettings)
   const [active, setActive] = useState<Chapter | null>(null)
   const [practice, setPractice] = useState(false)
+  const [showRoadmap, setShowRoadmap] = useState(false)
   const [loading, setLoading] = useState(() => !!localStorage.getItem(KEY))
 
   // Reload restores the saved campaign from the database; it never calls the model.
@@ -53,7 +55,11 @@ export default function App() {
   function startNew() {
     localStorage.removeItem(KEY)
     setCampaign(null)
+    setShowRoadmap(false)
   }
+
+  // A finished campaign shows the final results instead of the roadmap.
+  const allDone = !!campaign && campaign.chapters.length > 0 && campaign.chapters.every((c) => c.status === 'done')
 
   return (
     <div className="min-h-screen text-violet-50">
@@ -72,6 +78,13 @@ export default function App() {
           onFinish={finishChapter}
           onAbandon={() => setActive(null)}
         />
+      ) : campaign && allDone && !showRoadmap ? (
+        <QuestComplete
+          campaign={campaign}
+          settings={settings}
+          onRoadmap={() => setShowRoadmap(true)}
+          onNew={startNew}
+        />
       ) : campaign ? (
         <Roadmap
           campaign={campaign}
@@ -80,6 +93,7 @@ export default function App() {
           onStart={(ch) => start(ch, false)}
           onDemoBreaks={(ch) => start(ch, true)}
           onNew={startNew}
+          onResults={allDone ? () => setShowRoadmap(false) : undefined}
         />
       ) : (
         <Notes onCreated={created} />

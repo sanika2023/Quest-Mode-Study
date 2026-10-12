@@ -121,6 +121,43 @@ def test_regrading_replaces_villains_and_last_chapter_is_fine(saved_id):
     db.record_grading(second["id"], "quiz", [], [{"name": "A"}])
 
 
+def test_summary_counts_verdicts_and_lists_concepts_to_revisit(saved_id):
+    first, second = db.get_campaign(saved_id)["chapters"]
+    db.update_chapter_status(first["id"], "done")
+    db.record_grading(first["id"], "quiz", [
+        {"concept": "A", "verdict": "correct"},
+        {"concept": "B", "verdict": "partial"},
+        {"concept": "C", "verdict": "missed"},
+    ], [])
+    db.record_grading(second["id"], "teachback", [{"concept": "D", "verdict": "wrong"}], [])
+    try:
+        assert db.get_summary(saved_id) == {
+            "chapters_total": 2,
+            "chapters_done": 1,
+            "reviews": 2,
+            "counts": {"correct": 1, "partial": 1, "missed": 1, "wrong": 1},
+            "revisit": [
+                {"chapter": "One", "concept": "C", "verdict": "missed"},
+                {"chapter": "Two", "concept": "D", "verdict": "wrong"},
+            ],
+        }
+    finally:
+        with db.connect() as conn:
+            conn.execute("DELETE FROM attempts WHERE chapter_id = ANY(%s)", ([first["id"], second["id"]],))
+
+
+def test_summary_without_reviews_and_unknown_campaign(saved_id):
+    assert db.get_summary(saved_id) == {
+        "chapters_total": 2,
+        "chapters_done": 0,
+        "reviews": 0,
+        "counts": {"correct": 0, "partial": 0, "missed": 0, "wrong": 0},
+        "revisit": [],
+    }
+    assert db.get_summary("00000000-0000-0000-0000-000000000000") is None
+    assert db.get_summary("not-a-uuid") is None
+
+
 def test_get_notes(saved_id):
     first, _ = db.get_campaign(saved_id)["chapters"]
     assert db.get_notes(first["id"]) == "the notes"

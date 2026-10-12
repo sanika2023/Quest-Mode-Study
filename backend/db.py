@@ -113,6 +113,39 @@ def record_grading(chapter_id, mode, results, villains):
         )
 
 
+def get_summary(campaign_id):
+    """Final performance for a campaign from its saved attempts, or None. Never calls a model."""
+    try:
+        uuid.UUID(campaign_id)
+    except ValueError:
+        return None
+    with connect() as conn:
+        chapters = conn.execute(
+            "SELECT status FROM chapters WHERE campaign_id = %s", (campaign_id,)
+        ).fetchall()
+        if not chapters:
+            return None
+        attempts = conn.execute(
+            "SELECT ch.id, ch.title, a.concept, a.verdict FROM attempts a "
+            "JOIN chapters ch ON ch.id = a.chapter_id WHERE ch.campaign_id = %s "
+            "ORDER BY ch.position, a.created_at",
+            (campaign_id,),
+        ).fetchall()
+    counts = {v: 0 for v in ("correct", "partial", "missed", "wrong")}
+    for a in attempts:
+        counts[a["verdict"]] += 1
+    return {
+        "chapters_total": len(chapters),
+        "chapters_done": sum(c["status"] == "done" for c in chapters),
+        "reviews": len({a["id"] for a in attempts}),
+        "counts": counts,
+        "revisit": [
+            {"chapter": a["title"], "concept": a["concept"], "verdict": a["verdict"]}
+            for a in attempts if a["verdict"] in ("missed", "wrong")
+        ],
+    }
+
+
 def update_chapter_status(chapter_id, status):
     """Set a chapter's status; finishing it activates the next locked chapter. Returns the chapter or None."""
     try:

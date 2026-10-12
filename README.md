@@ -20,6 +20,7 @@ I study with the pomodoro technique, and two things kept going wrong: the breaks
      - **Pip, the Confused Apprentice**, confidently states a wrong claim from the chapter. You teach Pip the correct idea.
 5. **See the verdict.** Each concept is marked correct, partial, missed, or wrong, with the matching quote from your notes as proof.
 6. **Face your villains.** Missed and wrong concepts return as villains in the next chapter, shown on the roadmap and the focus screen.
+7. **Finish the quest.** Once every chapter is conquered, a final results screen shows your mastery score (correct counts 1, partial counts half), the verdict counts, chapters conquered, reviews faced, estimated focus time, and every concept worth revisiting. From there you can start a new quest or look back at the roadmap.
 
 ## Grounded in your notes
 
@@ -102,17 +103,17 @@ backend/
   scripts/            apply_schema, smoke_test
   tests/
 frontend/
-  src/screens/        Notes, Roadmap, Focus, BreakChoice, Review, Results
+  src/screens/        Notes, Roadmap, Focus, BreakChoice, Review, Results, QuestComplete
   src/breaks/         FunBreak, BoxBreathing
   src/review/         TextReview (review provider)
-  src/lib/            timer, settings, brown noise, breathing logic
+  src/lib/            timer, settings, brown noise, breathing logic, final summary math
   public/characters/  Orin and Pip portraits
 docs/ARCHITECTURE.md
 ```
 
 ## Status and roadmap
 
-Working end to end: notes to campaign, pomodoro timer with brown noise, fun and review breaks, cited grading, and villains carried into the next chapter.
+Working end to end: notes to campaign, pomodoro timer with brown noise, fun and review breaks, cited grading, villains carried into the next chapter, and a final results screen when the quest is complete.
 
 Done: the eval (citation pass rate and grading agreement), with results in the [Eval](#eval) section above.
 

@@ -21,9 +21,10 @@ interface Props {
   onStart: (chapter: Chapter) => void
   onDemoBreaks: (chapter: Chapter) => void
   onNew: () => void
+  onResults?: () => void
 }
 
-export default function Roadmap({ campaign, settings, onSettings, onStart, onDemoBreaks, onNew }: Props) {
+export default function Roadmap({ campaign, settings, onSettings, onStart, onDemoBreaks, onNew, onResults }: Props) {
   // Practice uses the current chapter, or the last one once all are done.
   const demoChapter = campaign.chapters.find((c) => c.status === 'active') ?? campaign.chapters[campaign.chapters.length - 1]
 
@@ -66,6 +67,11 @@ export default function Roadmap({ campaign, settings, onSettings, onStart, onDem
       </ol>
 
       <div className="mt-8 flex gap-6">
+        {onResults && (
+          <button onClick={onResults} className="btn-ghost">
+            View final results
+          </button>
+        )}
         <button onClick={onNew} className="btn-ghost">
           Start a new campaign
         </button>

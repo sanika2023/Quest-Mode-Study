@@ -104,6 +104,16 @@ def test_get_unknown_is_404(client, fakes):
     assert client.get("/api/campaigns/nope").status_code == 404
 
 
+def test_get_summary(client, monkeypatch):
+    summary = {"chapters_total": 2, "chapters_done": 2, "reviews": 1,
+               "counts": {"correct": 1, "partial": 0, "missed": 0, "wrong": 0}, "revisit": []}
+    monkeypatch.setattr(db, "get_summary", lambda cid: summary if cid == "abc" else None)
+    res = client.get("/api/campaigns/abc/summary")
+    assert res.status_code == 200
+    assert res.get_json() == summary
+    assert client.get("/api/campaigns/nope/summary").status_code == 404
+
+
 @pytest.fixture
 def chapter_fake(monkeypatch):
     seen = {}

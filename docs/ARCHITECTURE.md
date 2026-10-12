@@ -151,6 +151,7 @@ sequenceDiagram
 | `POST /api/review/turn` | `chapter_id`, `mode`, `transcript` (turns before this one), `message`, optional `skip` (quiz only) | `{ reply, done }` | Text mode only. No `message` returns the opening turn, built from saved data with no model call. Quiz asks up to 3 saved questions; `skip: true` reveals the answer and moves on with no model call; teach-back ends after 3 student turns. 400 for a bad mode or transcript, an empty mid-conversation message, or teach-back on a chapter with no misconception; 404 unknown chapter; 502 model failure |
 | `GET /api/review/voice-token` | query: `chapter_id`, `mode` | `{ token, variables }` | Returns 503 when voice is not configured |
 | `POST /api/chapters/:id/grade` | `mode`, `transcript`, optional `practice` (bool) | `{ results }` | Runs Call 2 and the citation check, writes `attempts`, and replaces the next chapter's `villains_json` with up to 2 missed or wrong concepts. With `practice: true` (Demo breaks) it grades but writes nothing. Quiz: one result per question asked, `concept` is a short topic label from the model and `source_quote` is that question's saved quote (`prompts/grading_quiz.md`). Teach-back: results for the chapter concepts the conversation covered, names constrained by a schema enum (`prompts/grading.md`). `quote_verified` is `null` in topic-only mode. 400 for a bad mode or transcript or no student turns, 404 unknown chapter, 502 model failure |
+| `GET /api/campaigns/:id/summary` | | `{ chapters_total, chapters_done, reviews, counts, revisit }` | Final results for the quest-complete screen, aggregated from `attempts`. Never calls the model. `counts` has one number per verdict; `reviews` is the number of chapters with graded attempts; `revisit` lists `{ chapter, concept, verdict }` for every missed or wrong attempt. 404 for an unknown or malformed id |
 | `GET /api/campaigns/:id/progress` | | Attempts over time | Stretch, for the progress chart |
 
 ## Data shapes
@@ -301,7 +302,7 @@ quest-mode-study/
   backend/
     app.py                 # Flask app and route registration
     config.py              # loads backend/.env; voice_available(), demo_mode()
-    db.py                  # connection, save_campaign, get_campaign
+    db.py                  # connection, save_campaign, get_campaign, get_summary
     schema.sql
     conftest.py            # puts backend/ on the pytest path
     tests/                 # pytest; Gemini is faked, DB tests skip without DATABASE_URL
@@ -336,9 +337,9 @@ quest-mode-study/
       App.tsx              # switches screens; restores the last campaign id from localStorage
       api/client.ts        # typed fetch wrappers; client.test.ts beside it
       characters.ts        # review characters (Elder Orin, Pip); images in public/characters/
-      screens/             # Notes, Roadmap, SettingsPanel, Session, Focus, BreakChoice, Review, Portrait, Results (built)
+      screens/             # Notes, Roadmap, SettingsPanel, Session, Focus, BreakChoice, Review, Portrait, Results, QuestComplete (final results once every chapter is done)
       hooks/useCountdown.ts  # end-timestamp countdown
-      lib/                 # timer.ts (durations, formatting), settings.ts (localStorage, default 25/5), brownNoise.ts, breathing.ts (4-4-4-4 phases); tests beside each
+      lib/                 # timer.ts (durations, formatting), settings.ts (localStorage, default 25/5), brownNoise.ts, breathing.ts (4-4-4-4 phases), summary.ts (mastery %, estimated focus minutes); tests beside each
       review/
         types.ts           # ReviewProvider, TranscriptTurn
         TextReview.ts
