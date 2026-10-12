@@ -4,6 +4,10 @@ Turn your study notes into a fantasy campaign. Each pomodoro is a chapter, each 
 
 Built solo at **Hack Dearborn 2026** (Mindscapes track).
 
+**[Watch the demo on YouTube](https://youtu.be/1KOC1f4pllA)** (recorded before the final results screen was added; see the [screenshots](#screenshots) for that).
+
+![The roadmap: one chapter per pomodoro, with a villain carried over from the previous chapter](docs/screenshots/roadmap.png)
+
 ## Why
 
 I study with the pomodoro technique, and two things kept going wrong: the breaks turned into doom-scrolling, and I re-read notes instead of actually testing myself. Quest-Mode Study keeps the pomodoro rhythm but makes the break count. You either rest properly (box breathing or a timed free break) or face a character who checks what you just learned, and the grading is tied to your own notes.
@@ -21,6 +25,15 @@ I study with the pomodoro technique, and two things kept going wrong: the breaks
 5. **See the verdict.** Each concept is marked correct, partial, missed, or wrong, with the matching quote from your notes as proof.
 6. **Face your villains.** Missed and wrong concepts return as villains in the next chapter, shown on the roadmap and the focus screen.
 7. **Finish the quest.** Once every chapter is conquered, a final results screen shows your mastery score (correct counts 1, partial counts half), the verdict counts, chapters conquered, reviews faced, estimated focus time, and every concept worth revisiting. From there you can start a new quest or look back at the roadmap.
+
+## Screenshots
+
+| | |
+| --- | --- |
+| **1. Add your notes**<br>![Notes screen](docs/screenshots/notes.png) | **2. Focus on the quest objectives**<br>![Focus timer](docs/screenshots/focus.png) |
+| **3. Choose your break**<br>![Break choice](docs/screenshots/break-choice.png) | **4. Fun break: the Breathing Sigil**<br>![Box breathing](docs/screenshots/box-breathing.png) |
+| **5. Review break: Elder Orin's quiz**<br>![Quiz with Elder Orin](docs/screenshots/quiz-orin.png) | **6. Review break: teach Pip**<br>![Teach-back with Pip](docs/screenshots/teachback-pip.png) |
+| **7. The verdict, cited to your notes**<br>![Results card](docs/screenshots/verdict.png) | **8. Quest complete**<br>![Final results screen](docs/screenshots/quest-complete.png) |
 
 ## Grounded in your notes
 
